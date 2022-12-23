@@ -1,6 +1,6 @@
-# Проектная работа 4 спринта
+# Проектная работа 5 спринта
 
-[Ссылка на репозиторий](https://github.com/sevrn73/Async_API_sprint_1)
+[Ссылка на репозиторий](https://github.com/sevrn73/Async_API_sprint_2)
 
 ## Запуск проекта
 
