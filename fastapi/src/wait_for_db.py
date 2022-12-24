@@ -23,7 +23,10 @@ def migrate_and_start(ps_connect: dict):
             ) as pg_conn, pg_conn.cursor() as curs:
                 db_conn = True
 
-        except psycopg2.OperationalError:
+        except Exception as exc:
+            print(3)
+            print(ps_connect)
+            print(exc)
             logger.info('Database unavailable, waititng 1 second...')
             time.sleep(1)
 
