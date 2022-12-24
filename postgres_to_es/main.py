@@ -4,7 +4,7 @@ import psycopg2
 from psycopg2.extras import DictCursor
 from dotenv import load_dotenv
 from state import JsonFileStorage, State
-from etl_process import EtlProcess
+from etl_process import EtlProcessFilms, EtlProcessGenres, EtlProcessPersons
 from logger import logger
 from config import DbSettings, ElasticSettings
 
@@ -20,26 +20,19 @@ def main(ps_connect: dict, es_connect: dict):
             with closing(
                 psycopg2.connect(**ps_connect, cursor_factory=DictCursor)
             ) as pg_conn, pg_conn.cursor() as curs:
-                storage = JsonFileStorage('state.json')
-                state = State(storage)
+                for model_name in ['movies', 'persons', 'genres']:
+                    storage = JsonFileStorage(f'{model_name}.json')
+                    state = State(storage)
 
-                EtlProcess.check_and_update(pg_conn, curs, es_connect, state)
-
-            with closing(
-                psycopg2.connect(**ps_connect, cursor_factory=DictCursor)
-            ) as pg_conn, pg_conn.cursor() as curs:
-                storage = JsonFileStorage('state_persons.json')
-                state = State(storage)
-
-                EtlProcess.check_and_update_persons(pg_conn, curs, es_connect, state)
-
-            with closing(
-                psycopg2.connect(**ps_connect, cursor_factory=DictCursor)
-            ) as pg_conn, pg_conn.cursor() as curs:
-                storage = JsonFileStorage('state_genres.json')
-                state = State(storage)
-
-                EtlProcess.check_and_update_genres(pg_conn, curs, es_connect, state)
+                    if model_name == 'movies':
+                        etl_process = EtlProcessFilms()
+                        etl_process.start(pg_conn, curs, es_connect, state, model_name)
+                    elif model_name == 'persons':
+                        etl_process = EtlProcessPersons()
+                        etl_process.start(pg_conn, curs, es_connect, state, model_name)
+                    elif model_name == 'genres':
+                        etl_process = EtlProcessGenres()
+                        etl_process.start(pg_conn, curs, es_connect, state, model_name)
 
         except psycopg2.OperationalError:
             logger.error('Error connecting to Postgres database')
