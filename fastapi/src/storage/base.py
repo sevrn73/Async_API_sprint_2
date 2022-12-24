@@ -5,8 +5,9 @@ from elasticsearch import AsyncElasticsearch, NotFoundError
 
 
 class BaseStorage:
-    def __init__(self, elastic: AsyncElasticsearch) -> None:
+    def __init__(self, elastic: AsyncElasticsearch, model: BaseModel) -> None:
         self.elastic = elastic
+        self.model = model
 
     @abc.abstractmethod
     async def _get_from_elastic(self, es_index: str, data_id: str) -> Optional[BaseModel]:

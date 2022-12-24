@@ -5,8 +5,8 @@ from models.film import ESFilm
 
 
 class FilmStorage(BaseStorage):
-    def __init__(self, elastic: AsyncElasticsearch) -> None:
-        super().__init__(elastic)
+    def __init__(self, elastic: AsyncElasticsearch, model: ESFilm) -> None:
+        super().__init__(elastic, model)
 
     async def _get_data_from_elastic(
         self, es_index: str, rating_filter: float, sort: bool, page_number: int, data_on_page: int
