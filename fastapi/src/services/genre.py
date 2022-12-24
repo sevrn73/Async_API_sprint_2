@@ -1,18 +1,19 @@
 from functools import lru_cache
 from typing import Optional
 from aioredis import Redis
-from elasticsearch import AsyncElasticsearch, NotFoundError
+from elasticsearch import AsyncElasticsearch
 from fastapi import Depends
 
 from services.base_service import BaseService
 from db.elastic import get_elastic
 from db.redis import get_redis
 from models.genre import ESGenre
+from storage.base import BaseStorage
 
 
 class GenreService(BaseService):
-    def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
-        super().__init__(redis, elastic)
+    def __init__(self, redis: Redis, storage: BaseStorage):
+        super().__init__(redis, storage)
         self.model = ESGenre
 
 
@@ -21,4 +22,5 @@ def get_genre_service(
     redis: Redis = Depends(get_redis),
     elastic: AsyncElasticsearch = Depends(get_elastic),
 ) -> GenreService:
-    return GenreService(redis, elastic)
+    storage = BaseStorage(elastic)
+    return GenreService(redis, storage)
