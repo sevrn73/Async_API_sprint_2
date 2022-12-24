@@ -37,6 +37,18 @@ services:
       - elasticsearch
       - service
 
+  tests:
+    build: tests/functional
+    # image: test_main
+    env_file:
+      - ./fastapi/.env
+    # entrypoint: >
+    #   sh -c "python3 /tests/functional/utils/wait_for_es.py
+    #   && python3 /tests/functional/utils/wait_for_redis.py
+    #   && pytest /tests/functional/src"
+    depends_on:
+      - fastapi
+
   nginx:
     image: nginx:1.23.2
     volumes:

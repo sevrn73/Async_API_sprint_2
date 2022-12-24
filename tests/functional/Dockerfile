@@ -1,9 +1,12 @@
 FROM python:3.8
 
-WORKDIR /tests
+WORKDIR /tests/functional
 
-COPY ./tests/functional/requirements.txt ./
-RUN pip3 install --upgrade pip
-RUN pip3 install -r requirements.txt
+COPY requirements.txt requirements.txt
 
-COPY ./tests .
+RUN  pip install --upgrade pip && \
+    pip install -r requirements.txt --no-cache-dir
+
+COPY . .
+
+ENTRYPOINT ["/tests/functional/docker-entrypoint.sh"]
