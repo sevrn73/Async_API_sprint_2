@@ -29,20 +29,19 @@ class PSExtract:
         return data
 
     def extract_data(self, last_modified: str, iter_model_name: str):
-        if self.model_name == 'movies':
+        if self.model_name == "movies":
             return self.extract_filmwork_data(last_modified, iter_model_name)
-        elif self.model_name == 'persons':
-            return self.extract_filmwork_data(last_modified)
-        elif self.model_name == 'genres':
-            return self.extract_filmwork_data(last_modified)
-        
+        elif self.model_name == "persons":
+            return self.extract_person_data(last_modified)
+        elif self.model_name == "genres":
+            return self.extract_genre_data(last_modified)
 
     def extract_filmwork_data(self, last_modified: str, iter_model_name: str) -> list:
-        if iter_model_name == 'film_work':
+        if iter_model_name == "film_work":
             where = f"WHERE fw.modified > '{last_modified}' "
-        elif iter_model_name == 'person':
+        elif iter_model_name == "person":
             where = f"WHERE p.modified > '{last_modified}' "
-        elif iter_model_name == 'genre':
+        elif iter_model_name == "genre":
             where = f"WHERE g.modified > '{last_modified}' "
         query = (
             "SELECT fw.id as fw_id, fw.title, fw.description, "
