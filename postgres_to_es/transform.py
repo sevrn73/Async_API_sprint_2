@@ -1,6 +1,5 @@
 from p_schemas import ESFilmworkData, FilmworkData, ESPersonData, ESGenreData
 
-
 def parse_from_postgres_to_es(data: dict):
     film_data = FilmworkData.parse_obj(data)
     actors = {}

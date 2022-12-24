@@ -133,11 +133,8 @@ dmypy.json
 log.txt
 .log.txt
 
-
-postgres_to_es/state.json
-/postgres_to_es/state.json
-
 /pgdata/
 /pgdata
-postgres_to_es/state_genres.json
-postgres_to_es/state_persons.json
+postgres_to_es/movies.json
+postgres_to_es/genres.json
+postgres_to_es/persons.json
