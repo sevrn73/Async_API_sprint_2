@@ -8,12 +8,12 @@ from db.elastic import get_elastic
 from db.redis import get_redis
 from models.person import ESPerson
 from storage.base import BaseStorage
+from cache.redis_cache import RedisCache
 
 
 class PersonService(BaseService):
-    def __init__(self, redis: Redis, storage: BaseStorage):
-        super().__init__(redis, storage)
-        self.model = ESPerson
+    def __init__(self, redis_cache: Redis, storage: BaseStorage):
+        super().__init__(redis_cache, storage)
 
 
 @lru_cache()
@@ -21,5 +21,6 @@ def get_person_service(
     redis: Redis = Depends(get_redis),
     elastic: AsyncElasticsearch = Depends(get_elastic),
 ) -> PersonService:
-    storage = BaseStorage(elastic)
-    return PersonService(redis, storage)
+    redis_cache = RedisCache(redis, ESPerson)
+    storage = BaseStorage(elastic, ESPerson)
+    return PersonService(redis_cache, storage)
