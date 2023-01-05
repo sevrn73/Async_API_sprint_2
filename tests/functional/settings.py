@@ -13,4 +13,5 @@ class TestSettings(BaseSettings):
     service_url: str = Field('http://fastapi:8001', env='FASTAPI_HOST')
 
 
+
 TEST_SETTINGS = TestSettings()

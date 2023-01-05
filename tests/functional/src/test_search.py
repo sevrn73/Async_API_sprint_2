@@ -6,7 +6,7 @@ from typing import List
 import aiohttp
 import pytest
 
-from tests.functional.settings import TEST_SETTINGS
+from functional.utils.settings import TEST_SETTINGS
 
 
 @pytest.mark.parametrize(
@@ -23,7 +23,7 @@ from tests.functional.settings import TEST_SETTINGS
     ]
 )
 @pytest.mark.asyncio
-async def test_search2(make_get_request, es_write_data, es_data: List[dict], query_data: dict, expected_answer: dict):
+async def test_search2(make_get_request, es_write_data, query_data: dict, expected_answer: dict): #es_data: List[dict], query_data: dict, expected_answer: dict):
     es_data = [{
         'id': str(uuid.uuid4()),
         'imdb_rating': 8.5,
@@ -48,10 +48,10 @@ async def test_search2(make_get_request, es_write_data, es_data: List[dict], que
 
     await es_write_data(es_data)
     session = aiohttp.ClientSession()
-    url = TEST_SETTINGS.service_url + '/api/v1/search'
+    url = TEST_SETTINGS.service_url + '/api/v1/films/search'
     query_data = {'search': 'The Star'}
     response = await make_get_request('/search', query_data)
-    body = await response.json()
+    # body = await response.json()
     headers = response.headers
     status = response.status
     assert status == expected_answer["status"]

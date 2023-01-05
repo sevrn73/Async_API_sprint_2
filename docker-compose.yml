@@ -31,21 +31,24 @@ services:
     image: fastapi:0.88.0
     env_file:
       - ./fastapi/.env
+    ports:
+      - 8001:8001
     depends_on:
       - db
       - redis
       - elasticsearch
       - service
+    command: "uvicorn main:app --reload --workers 1 --host 0.0.0.0 --port 8001"
 
   tests:
     build: tests/functional
     # image: test_main
     env_file:
-      - ./fastapi/.env
-    # entrypoint: >
-    #   sh -c "python3 /tests/functional/utils/wait_for_es.py
-    #   && python3 /tests/functional/utils/wait_for_redis.py
-    #   && pytest /tests/functional/src"
+      - ./tests/functional/.env
+    entrypoint: >
+      sh -c "python3 utils/wait_for_es.py
+      && python3 utils/wait_for_redis.py
+      && pytest src"
     depends_on:
       - fastapi
 

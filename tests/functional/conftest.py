@@ -5,18 +5,40 @@ from typing import Any, List
 import aiohttp
 import aioredis
 import pytest
-from elasticsearch import AsyncElasticsearch, helpers
-from testdata.models import HTTPResponse
-from settings import TEST_SETTINGS
-from utils.helpers import get_es_bulk_query
-from utils.wait_for_es import wait_for_es
-from utils.wait_for_redis import wait_for_redis
+from elasticsearch import AsyncElasticsearch, helpers, exceptions
+from functional.testdata.models import HTTPResponse
+from functional.utils.settings import TEST_SETTINGS
+from functional.utils.helpers import get_es_bulk_query
+from functional.utils.wait_for_es_dub import wait_for_es
+from functional.utils.wait_for_redis_dub import wait_for_redis
+
+import logging
+logger = logging.getLogger('tests')
+from typing import Generator, List
+
+
+def generate_doc(docs: List[dict], index: str) -> Generator:
+    for doc in docs:
+        yield {
+            '_index': index,
+            '_id': doc['id'],
+            '_source': doc
+        }
+
+
+def delete_doc(docs: List[dict], index: str) -> Generator:
+    for doc in docs:
+        yield {
+            '_op_type': 'delete',
+            '_index': index,
+            '_id': doc['id'],
+        }
 
 
 @pytest.fixture(scope='session')
 async def es_client():
     await wait_for_es()
-    client = AsyncElasticsearch(hosts='127.0.0.1:9200')
+    client = AsyncElasticsearch(hosts='http://elasticsearch:9200')
     yield client
     await client.close()
 
@@ -43,13 +65,16 @@ def es_write_data(es_client: AsyncElasticsearch):
             raise Exception('Ошибка записи данных в Elasticsearch')
     return inner
 
+
 @pytest.fixture
 async def make_get_request(session, redis_client):
     async def inner(method: str, params: dict = None, cleaning_redis: bool = True) -> HTTPResponse:
         params = params or {}
+        # в боевых системах старайтесь так не делать!
         url = TEST_SETTINGS.service_url + '/api/v1' + method
         start = time.time()
         async with session.get(url, params=params) as response:
+            #  очищаем кэш redis
             if cleaning_redis:
                 await redis_client.delete(str(response.url))
 
@@ -59,12 +84,8 @@ async def make_get_request(session, redis_client):
                 status=response.status,
                 url=response.url,
                 resp_speed=(time.time()-start))
+
     return inner
-
-@pytest.fixture(scope='function')
-async def prepare_data(es_client):
-    pass
-
 
 
 @pytest.fixture
@@ -75,14 +96,19 @@ async def get_all_data_elastic(es_client):
                 "match_all": {}
             }
         }
+
         try:
             doc = await es_client.search(index=index, body=query, size=10000)
-        except Exception:
+        except exceptions.NotFoundError:
             return []
+
         if not doc:
             return []
         result = doc["hits"]["hits"]
+
         if not result:
             return []
+
         return [data["_source"] for data in result]
     return inner
+
