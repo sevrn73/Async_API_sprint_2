@@ -10,28 +10,28 @@ class Command(BaseCommand):
     """Django command to pause execution until db is available"""
 
     def handle(self, *args, **options):
-        self.stdout.write('Waiting for database...')
+        self.stdout.write("Waiting for database...")
         db_conn = None
         while not db_conn:
             try:
-                db_conn = connections['default']
+                db_conn = connections["default"]
             except OperationalError:
-                self.stdout.write('Database unavailable, waititng 1 second...')
+                self.stdout.write("Database unavailable, waititng 1 second...")
                 time.sleep(1)
 
-        self.stdout.write(self.style.SUCCESS('Database available!'))
+        self.stdout.write(self.style.SUCCESS("Database available!"))
 
-        p = subprocess.Popen(['python', 'manage.py', 'migrate'])
+        p = subprocess.Popen(["python", "manage.py", "migrate"])
         p.wait()
 
-        p = subprocess.Popen(['python', 'manage.py', 'makemigrations'])
+        p = subprocess.Popen(["python", "manage.py", "makemigrations"])
         p.wait()
 
-        p = subprocess.Popen(['python', 'manage.py', 'migrate'])
+        p = subprocess.Popen(["python", "manage.py", "migrate"])
         p.wait()
 
         p = subprocess.Popen(
-            ['python', 'manage.py', 'createsuperuser', '--noinput', '--username=admin', '--email=admin@email.com']
+            ["python", "manage.py", "createsuperuser", "--noinput", "--username=admin", "--email=admin@email.com"]
         )
         p.wait()
 
@@ -93,9 +93,9 @@ class Command(BaseCommand):
                     "type": "text",
                     "analyzer": "ru_en",
                     "fields": {
-                    "raw": {
-                        "type":  "keyword"
-                    }
+                        "raw": {
+                            "type":  "keyword"
+                        }
                     }
                 },
                 "description": {
@@ -146,9 +146,9 @@ class Command(BaseCommand):
         """
         time.sleep(10)
         requests.put(
-            url='http://elasticsearch:9200/movies',
+            url="http://elasticsearch:9200/movies",
             headers={
-                'Content-Type': 'application/json',
+                "Content-Type": "application/json",
             },
             data=request_body,
         )
@@ -198,29 +198,29 @@ class Command(BaseCommand):
             "mappings": {
                 "dynamic": "strict",
                 "properties": {
-                "id": {
-                    "type": "keyword"
-                },
-                "genre": {
-                    "type": "text",
-                    "analyzer": "ru_en",
-                    "raw": {
-                        "type":  "keyword"
+                    "id": {
+                        "type": "keyword"
+                    },
+                    "genre": {
+                        "type": "text",
+                        "analyzer": "ru_en",
+                        "raw": {
+                            "type":  "keyword"
+                        }
+                    },
+                    "description": {
+                        "type": "text",
+                        "analyzer": "ru_en"
                     }
-                },
-                "description": {
-                    "type": "text",
-                    "analyzer": "ru_en"
-                }
                 }
             }
         }
         """
         time.sleep(3)
         requests.put(
-            url='http://elasticsearch:9200/genres',
+            url="http://elasticsearch:9200/genres",
             headers={
-                'Content-Type': 'application/json',
+                "Content-Type": "application/json",
             },
             data=request_body,
         )
@@ -279,6 +279,10 @@ class Command(BaseCommand):
                         "raw": {
                             "type":  "keyword"
                         }
+                    },
+                    "film_ids": {
+                        "type": "text",
+                        "analyzer": "ru_en"
                     }
                 }
             }
@@ -286,15 +290,15 @@ class Command(BaseCommand):
         """
         time.sleep(3)
         requests.put(
-            url='http://elasticsearch:9200/persons',
+            url="http://elasticsearch:9200/persons",
             headers={
-                'Content-Type': 'application/json',
+                "Content-Type": "application/json",
             },
             data=request_body,
         )
 
         time.sleep(1)
-        p = subprocess.Popen(['python', 'sqlite_to_postgres/load_data.py'])
+        p = subprocess.Popen(["python", "sqlite_to_postgres/load_data.py"])
         p.wait()
 
-        subprocess.run(['gunicorn', 'example.wsgi:application', '--workers=2', '--bind', '0.0.0.0:8000'])
+        subprocess.run(["gunicorn", "example.wsgi:application", "--workers=2", "--bind", "0.0.0.0:8000"])

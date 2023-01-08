@@ -30,7 +30,7 @@ class ESGenreData(BaseModel):
 class ESPersonData(BaseModel):
     id: str
     name: str
-    # film_ids: Optional[List[str]]
+    film_ids: Optional[List[str]]
 
 
 class ESFilmworkData(BaseModel):

@@ -29,23 +29,23 @@ class PSExtract:
         return data
 
     def extract_data(self, last_modified: str, iter_model_name: str):
-        if self.model_name == 'movies':
+        if self.model_name == "movies":
             return self.extract_filmwork_data(last_modified, iter_model_name)
-        elif self.model_name == 'persons':
+        elif self.model_name == "persons":
             return self.extract_person_data(last_modified)
-        elif self.model_name == 'genres':
+        elif self.model_name == "genres":
             return self.extract_genre_data(last_modified)
 
     def extract_filmwork_data(self, last_modified: str, iter_model_name: str) -> list:
-        if iter_model_name == 'film_work':
+        if iter_model_name == "film_work":
             where = f"WHERE fw.modified > '{last_modified}' "
-        elif iter_model_name == 'person':
+        elif iter_model_name == "person":
             where = f"WHERE p.modified > '{last_modified}' "
-        elif iter_model_name == 'genre':
+        elif iter_model_name == "genre":
             where = f"WHERE g.modified > '{last_modified}' "
         query = (
-            'SELECT fw.id as fw_id, fw.title, fw.description, '
-            'fw.rating, fw.type, fw.created, fw.modified, '
+            "SELECT fw.id as fw_id, fw.title, fw.description, "
+            "fw.rating, fw.type, fw.created, fw.modified, "
             "COALESCE ( \
                 json_agg( \
                     DISTINCT jsonb_build_object( \
@@ -56,16 +56,16 @@ class PSExtract:
                 ) FILTER (WHERE p.id is not null), \
                 '[]' \
             ) as persons, "
-            'array_agg(DISTINCT g.name) as genres '
-            'FROM content.film_work fw '
-            'LEFT JOIN content.person_film_work pfw ON pfw.film_work_id = fw.id '
-            'LEFT JOIN content.person p ON p.id = pfw.person_id '
-            'LEFT JOIN content.genre_film_work gfw ON gfw.film_work_id = fw.id '
-            'LEFT JOIN content.genre g ON g.id = gfw.genre_id '
-            f'{where}'
-            'GROUP BY fw.id '
-            'ORDER BY modified '
-            f'LIMIT {self.LIMIT_ROWS} OFFSET {self.offset};'
+            "array_agg(DISTINCT g.name) as genres "
+            "FROM content.film_work fw "
+            "LEFT JOIN content.person_film_work pfw ON pfw.film_work_id = fw.id "
+            "LEFT JOIN content.person p ON p.id = pfw.person_id "
+            "LEFT JOIN content.genre_film_work gfw ON gfw.film_work_id = fw.id "
+            "LEFT JOIN content.genre g ON g.id = gfw.genre_id "
+            f"{where}"
+            "GROUP BY fw.id "
+            "ORDER BY modified "
+            f"LIMIT {self.LIMIT_ROWS} OFFSET {self.offset};"
         )
         data = self.extract(query, self.curs)
 
@@ -74,14 +74,21 @@ class PSExtract:
     def extract_person_data(self, last_modified: str) -> list:
         where = f"WHERE p.modified > '{last_modified}' "
         query = (
-            'SELECT p.id , p.full_name as name, '
-            'array_agg(DISTINCT p.film_work_id) as film_ids '
-            'FROM content.person p '
-            'LEFT JOIN content.person_film_work pfw ON pfw.person_id = p.id '
-            f'{where}'
-            'GROUP BY p.id '
-            'ORDER BY modified '
-            f'LIMIT {self.LIMIT_ROWS} OFFSET {self.offset};'
+            "SELECT p.id as id , p.full_name as name, "
+            "COALESCE ( \
+                json_agg( \
+                    DISTINCT jsonb_build_object( \
+                        'film_work_id', pfw.film_work_id \
+                    ) \
+                ) FILTER (WHERE p.id is not null), \
+                '[]' \
+            ) as film_ids "
+            "FROM content.person p "
+            "LEFT JOIN content.person_film_work pfw ON pfw.person_id = p.id "
+            f"{where}"
+            "GROUP BY p.id "
+            "ORDER BY modified "
+            f"LIMIT {self.LIMIT_ROWS} OFFSET {self.offset};"
         )
         data = self.extract(query, self.curs)
         return data
@@ -89,12 +96,12 @@ class PSExtract:
     def extract_genre_data(self, last_modified: str) -> list:
         where = f"WHERE g.modified > '{last_modified}' "
         query = (
-            'SELECT g.id, g.name as genre, g.description '
-            'FROM content.genre g '
-            f'{where}'
-            'GROUP BY g.id '
-            'ORDER BY modified '
-            f'LIMIT {self.LIMIT_ROWS} OFFSET {self.offset};'
+            "SELECT g.id, g.name as genre, g.description "
+            "FROM content.genre g "
+            f"{where}"
+            "GROUP BY g.id "
+            "ORDER BY modified "
+            f"LIMIT {self.LIMIT_ROWS} OFFSET {self.offset};"
         )
         data = self.extract(query, self.curs)
 
