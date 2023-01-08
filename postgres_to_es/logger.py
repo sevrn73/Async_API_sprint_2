@@ -1,7 +1,8 @@
 import logging
-
+import sys
 
 logging.basicConfig(
-    filename="log.txt",
+    filename='log.txt',
 )
-logger = logging.getLogger("loader")
+logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
+logger = logging.getLogger('loader')

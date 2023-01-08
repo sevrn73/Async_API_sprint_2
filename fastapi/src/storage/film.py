@@ -30,3 +30,42 @@ class FilmStorage(BaseStorage):
         except NotFoundError:
             return None
         return [self.model(**_["_source"]) for _ in data["hits"]["hits"]]
+
+    async def _get_data_from_elastic_with_list_id(self, es_index: str, film_ids: List[str]) -> Optional[List[ESFilm]]:
+        try:
+            data = await self.elastic.search(
+                index=es_index,
+                body={
+                    "query": {
+                        "bool": {
+                            "should": [{"match_phrase": {"id": film_id}} for film_id in film_ids],
+                            "minimum_should_match": 1,
+                        },
+                    }
+                },
+            )
+        except NotFoundError:
+            return None
+
+        if not data:
+            return None
+        return [self.model(**_["_source"]) for _ in data["hits"]["hits"]]
+
+    async def _get_request(
+        self, es_index: str, query: str, sort: bool, page_number: int, data_on_page: int
+    ) -> Optional[List[ESFilm]]:
+        try:
+            data = await self.elastic.search(
+                index=es_index,
+                from_=page_number,
+                body={
+                    "query": {"multi_match": {"query": f"{query}", "fields": ["title", "description"]}}
+                    if query
+                    else {"match_all": {}}
+                },
+                size=data_on_page,
+                sort=f"imdb_rating:{'asc' if sort else 'desc'}",
+            )
+        except NotFoundError:
+            return None
+        return [self.model(**_["_source"]) for _ in data["hits"]["hits"]]

@@ -1,5 +1,6 @@
 from p_schemas import ESFilmworkData, FilmworkData, ESPersonData, ESGenreData
 
+
 def parse_from_postgres_to_es(data: dict):
     film_data = FilmworkData.parse_obj(data)
     actors = {}
@@ -27,10 +28,16 @@ def parse_from_postgres_to_es(data: dict):
     )
     return es_data
 
-def parse_persons_postgres_to_es(data:dict):
-    person_data = ESPersonData.parse_obj(data)
+
+def parse_persons_postgres_to_es(data: dict):
+    person_data = ESPersonData(
+        id=data["id"],
+        name=data["name"],
+        film_ids=[_["film_work_id"] for _ in data["film_ids"]],
+    )
     return person_data
 
-def parse_genres_postgres_to_es(data:dict):
+
+def parse_genres_postgres_to_es(data: dict):
     genre_data = ESGenreData.parse_obj(data)
     return genre_data

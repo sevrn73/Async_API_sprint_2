@@ -74,8 +74,17 @@ class PSExtract:
     def extract_person_data(self, last_modified: str) -> list:
         where = f"WHERE p.modified > '{last_modified}' "
         query = (
-            "SELECT p.id , p.full_name as name "
+            "SELECT p.id as id , p.full_name as name, "
+            "COALESCE ( \
+                json_agg( \
+                    DISTINCT jsonb_build_object( \
+                        'film_work_id', pfw.film_work_id \
+                    ) \
+                ) FILTER (WHERE p.id is not null), \
+                '[]' \
+            ) as film_ids "
             "FROM content.person p "
+            "LEFT JOIN content.person_film_work pfw ON pfw.person_id = p.id "
             f"{where}"
             "GROUP BY p.id "
             "ORDER BY modified "
