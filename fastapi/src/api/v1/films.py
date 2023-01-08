@@ -54,3 +54,28 @@ async def movies_details(
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=ExceptionDetail.MoviesDetails)
 
     return films
+
+# @router.get(
+#     '/search',
+#     response_model=list[Film],
+#     summary="Search films",
+#     description="Search films by provided query"
+# )
+# async def search_films(
+#         query: str = None,
+#         page_number: int = Query(default=1, alias='page[number]', ge=1),
+#         page_size: int = Query(default=20, alias='page[size]', ge=1),
+#         film_service: FilmService = Depends(get_film_service),
+# ) -> list[Film]:
+#     """Осуществляет поиск фильмов по базе и возвращает список с подходящими фильмами,
+#     учитывая пагинацию"""
+#     films = await film_service.get_page_number(
+#         query=query,
+#         page=page_number,
+#         page_size=page_size,
+#     )
+#     if not films:
+#         # Если фильмы не найдены, отдаём 404 статус
+#         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=ExceptionDetail.MoviesDetails)
+
+    # return [Film(uuid=film.id, title=film.title, imdb_rating=film.imdb_rating) for film in films]
