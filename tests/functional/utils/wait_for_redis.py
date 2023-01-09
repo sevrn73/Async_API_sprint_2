@@ -1,7 +1,9 @@
 import asyncio
 import aioredis
 import logging
+import time
 from settings import TEST_SETTINGS
+
 logger = logging.getLogger('tests')
 
 async def wait_for_redis():
@@ -16,4 +18,3 @@ async def wait_for_redis():
 
 if __name__ == '__main__':
     asyncio.run(wait_for_redis())
-

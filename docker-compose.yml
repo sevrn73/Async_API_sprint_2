@@ -78,6 +78,8 @@ services:
   redis:
     image: redis:7.0.6-alpine
     command: redis-server
+    ports:
+      - 6379:6379
 
   etl:
     build: postgres_to_es

@@ -1,7 +1,9 @@
 import asyncio
 from elasticsearch import AsyncElasticsearch
 import logging
+
 from settings import TEST_SETTINGS
+
 logger = logging.getLogger('tests')
 
 async def wait_for_es():

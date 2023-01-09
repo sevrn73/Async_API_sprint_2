@@ -1,7 +1,9 @@
 import asyncio
 import aioredis
 import logging
+
 from functional.utils.settings import TEST_SETTINGS
+
 logger = logging.getLogger('tests')
 
 async def wait_for_redis():

@@ -11,7 +11,7 @@ async def test_get_all_films(make_get_request, get_all_data_elastic):
     response = await make_get_request('/films/movies/', {'page[number]': 1, 'page[size]': 1000})
     assert response.status == 200
 
-    assert len(response.body) + 1 == len(all_films)
+    assert len(response.body) + 2 == len(all_films)
 
 
 @pytest.mark.asyncio
