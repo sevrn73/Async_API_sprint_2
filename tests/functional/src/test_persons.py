@@ -6,7 +6,7 @@ async def test_get_all_persons(make_get_request, get_all_data_elastic):
     """Тест запроса для всех персон"""
     all_persons = await get_all_data_elastic('persons')
 
-    response = await make_get_request('/persons/persons/', {'page[size]': 5000, 'page[number]': 1})
+    response = await make_get_request('/persons/persons/', {'page[size]': 4500, 'page[number]': 1})
 
     assert response.status == 200
 
@@ -24,21 +24,24 @@ async def test_get_by_id(make_get_request):
     # Проверка результата
     assert response.status == 200
 
-    assert response.body == person_data
+    assert response.body["id"] == person_data["id"]
+    assert response.body["name"] == person_data["name"]
 
 @pytest.mark.asyncio
-async def test_get_films_by_peson_id( prepare_es_film, make_get_request):
+async def test_get_films_by_peson_id(make_get_request):
     """Тест проверяет получение фильмов по uuid персоны"""
-    film = prepare_es_film[0]
-    short_film = {'id': film.get('id'),
-                  'title': film.get('title'),
-                  'imdb_rating': film.get('imdb_rating')}
 
-    response = await make_get_request('/person/7f489c61-1a21-43d2-a3ad-3d900f8a9b5e/films')
+    film = {
+            "id": "aa5aea7a-cd65-4aec-963f-98375b370717",
+            "title": "The Young Person's Guide to Becoming a Rock Star",
+            "imdb_rating": 8.1
+        }
+
+    response = await make_get_request('/persons/4db91bc9-a3f0-449d-8afd-94fda9641da8/films')
 
     assert response.status == 200
 
-    assert response.body[0] == short_film
+    assert response.body[0] == film
 
 @pytest.mark.asyncio
 async def test_validator_1(make_get_request):

@@ -1,38 +1,16 @@
-import asyncio
 import time
 from typing import Any, List
 
 import aiohttp
 import aioredis
 import pytest
-from elasticsearch import AsyncElasticsearch, helpers, exceptions
+from elasticsearch import AsyncElasticsearch, exceptions
+
 from functional.testdata.models import HTTPResponse
 from functional.utils.settings import TEST_SETTINGS
 from functional.utils.helpers import get_es_bulk_query
 from functional.utils.wait_for_es_dub import wait_for_es
 from functional.utils.wait_for_redis_dub import wait_for_redis
-
-import logging
-logger = logging.getLogger('tests')
-from typing import Generator, List
-
-
-def generate_doc(docs: List[dict], index: str) -> Generator:
-    for doc in docs:
-        yield {
-            '_index': index,
-            '_id': doc['id'],
-            '_source': doc
-        }
-
-
-def delete_doc(docs: List[dict], index: str) -> Generator:
-    for doc in docs:
-        yield {
-            '_op_type': 'delete',
-            '_index': index,
-            '_id': doc['id'],
-        }
 
 
 @pytest.fixture(scope='session')
@@ -64,7 +42,6 @@ def es_write_data(es_client: AsyncElasticsearch):
         if response['errors']:
             raise Exception('Ошибка записи данных в Elasticsearch')
     return inner
-
 
 @pytest.fixture
 async def make_get_request(session, redis_client):
