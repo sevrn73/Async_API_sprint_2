@@ -1,66 +1,73 @@
 import pytest
+from http import HTTPStatus
 
 
-@pytest.mark.asyncio
 async def test_get_search(make_get_request):
     """Тест поиска записи по фразе"""
-
-    # получаем все фильмы из elasticsearch
-    film =   {
-        "id": "92dcddff-a70e-497c-92dc-0da12d1d528a",
-        "title": "Exile: A Star Wars Story",
-        "imdb_rating": 5.8
-    }
-    response = await make_get_request('/films/search/', {'query': 'Exile'})
-    assert response.status == 200
+    film = {"id": "92dcddff-a70e-497c-92dc-0da12d1d528a", "title": "Exile: A Star Wars Story", "imdb_rating": 5.8}
+    response = await make_get_request("/films/search/", {"query": "Exile"})
+    assert response.status == HTTPStatus.OK
 
     assert response.body[0] == film
 
 
-@pytest.mark.asyncio
 async def test_get_n(make_get_request):
     """Тест проверяет вывод N записей"""
 
-    response = await make_get_request('/films/search/', {'query':'war', 'page[number]': 1, 'page[size]': 3})
+    response = await make_get_request("/films/search/", {"query": "war", "page[number]": 1, "page[size]": 3})
 
     # Проверка результата
-    assert response.status == 200
+    assert response.status == HTTPStatus.OK
 
     assert len(response.body) == 3
 
 
-@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "url, expected",
+    [
+        (["/films/search/123"], HTTPStatus.NOT_FOUND),
+        (["/films/search/", {"query": 3131}], HTTPStatus.NOT_FOUND),
+        (["/films/search/", {"page[number]": 0}], HTTPStatus.UNPROCESSABLE_ENTITY),
+        (["/films/search/", {"page[size]": 0}], HTTPStatus.UNPROCESSABLE_ENTITY),
+    ],
+)
+async def test_validator(make_get_request, url, expected):
+    """Тест корректной валидации форм"""
+    response = await make_get_request(*url)
+    assert response.status == expected
+
+
 async def test_validator_1(make_get_request):
     """Тест корректной валидации форм"""
-    response = await make_get_request('/films/search/123')
-    assert response.status == 404
+    response = await make_get_request("/films/search/123")
+    assert response.status == HTTPStatus.NOT_FOUND
 
-@pytest.mark.asyncio
+
 async def test_validator_2(make_get_request):
     """Тест корректной валидации форм"""
-    response = await make_get_request('/films/search/}', {'query':3131})
-    assert response.status == 404
+    response = await make_get_request("/films/search/}", {"query": 3131})
+    assert response.status == HTTPStatus.NOT_FOUND
 
-@pytest.mark.asyncio
+
 async def test_validator_3(make_get_request):
     """Тест корректной валидации форм"""
-    response = await make_get_request('/films/search/', {'page[number]': 0})
-    assert response.status == 422
+    response = await make_get_request("/films/search/", {"page[number]": 0})
+    assert response.status == HTTPStatus.UNPROCESSABLE_ENTITY
 
-@pytest.mark.asyncio
+
 async def test_validator_4(make_get_request):
     """Тест корректной валидации форм"""
-    response = await make_get_request('/films/search/', {'page[size]': 0})
-    assert response.status == 422
+    response = await make_get_request("/films/search/", {"page[size]": 0})
+    assert response.status == HTTPStatus.UNPROCESSABLE_ENTITY
 
-@pytest.mark.asyncio
+
 async def test_redis(make_get_request):
     """Тест кэширования"""
     # этот запрос сделан без удаления кэша
-    response = await make_get_request('/films/search/', {'query':'war', 'page[number]': 1, 'page[size]': 10}, False)
-    assert response.status == 200
+    response = await make_get_request("/films/search/", {"query": "war", "page[number]": 1, "page[size]": 10}, False)
+    assert response.status == HTTPStatus.OK
 
-    response2 = await make_get_request('/films/search/', {'query':'war', 'page[number]': 1, 'page[size]': 10})
-    assert response.status == 200
+    response2 = await make_get_request("/films/search/", {"query": "war", "page[number]": 1, "page[size]": 10})
+    assert response.status == HTTPStatus.OK
 
     assert response.resp_speed > response2.resp_speed
