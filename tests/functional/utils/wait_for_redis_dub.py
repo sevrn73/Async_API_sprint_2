@@ -11,7 +11,6 @@ async def wait_for_redis():
     response = await redis_client.ping()
     while not response:
         await asyncio.sleep(2)
-        print('Redis is unavailable - sleeping')
         logger.info('Redis is unavailable - sleeping')
         response = await redis_client.ping()
 

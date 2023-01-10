@@ -8,12 +8,12 @@ from services.base_service import BaseService
 from db.elastic import get_elastic
 from db.redis import get_redis
 from models.genre import ESGenre
-from storage.base import BaseStorage
+from storage.base import BaseElasticStorage
 from cache.redis_cache import RedisCache
 
 
 class GenreService(BaseService):
-    def __init__(self, redis_cache: RedisCache, storage: BaseStorage):
+    def __init__(self, redis_cache: RedisCache, storage: BaseElasticStorage):
         super().__init__(redis_cache, storage)
 
 
@@ -23,5 +23,5 @@ def get_genre_service(
     elastic: AsyncElasticsearch = Depends(get_elastic),
 ) -> GenreService:
     redis_cache = RedisCache(redis, ESGenre)
-    storage = BaseStorage(elastic, ESGenre)
+    storage = BaseElasticStorage(elastic, ESGenre)
     return GenreService(redis_cache, storage)
