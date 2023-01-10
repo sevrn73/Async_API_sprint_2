@@ -42,7 +42,6 @@ services:
 
   tests:
     build: tests/functional
-    # image: test_main
     env_file:
       - ./tests/functional/.env
     entrypoint: >
