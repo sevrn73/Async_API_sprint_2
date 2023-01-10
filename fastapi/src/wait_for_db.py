@@ -24,9 +24,6 @@ def migrate_and_start(ps_connect: dict):
                 db_conn = True
 
         except Exception as exc:
-            print(3)
-            print(ps_connect)
-            print(exc)
             logger.info('Database unavailable, waititng 1 second...')
             time.sleep(1)
 
