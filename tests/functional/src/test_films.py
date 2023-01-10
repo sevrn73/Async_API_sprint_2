@@ -40,30 +40,6 @@ async def test_validator(make_get_request, url, expected):
     assert response.status == expected
 
 
-async def test_validator_1(make_get_request):
-    """Тест корректной валидации форм"""
-    response = await make_get_request("/films")
-    assert response.status == 404
-
-
-async def test_validator_2(make_get_request):
-    """Тест корректной валидации форм"""
-    response = await make_get_request("/films/wrong-uuid")
-    assert response.status == 404
-
-
-async def test_validator_3(make_get_request):
-    """Тест корректной валидации форм"""
-    response = await make_get_request("/films/movies/", {"page[number]": 0})
-    assert response.status == 422
-
-
-async def test_validator_4(make_get_request):
-    """Тест корректной валидации форм"""
-    response = await make_get_request("/films/movies/", {"page[size]": 0})
-    assert response.status == 422
-
-
 async def test_redis(make_get_request):
     """Тест кэширования"""
     # этот запрос сделан без удаления кэша
