@@ -56,31 +56,6 @@ async def test_validator(make_get_request, url, expected):
     assert response.status == expected
 
 
-async def test_validator_1(make_get_request):
-    """Тест корректной валидации форм"""
-
-    response = await make_get_request("/persons/")
-    assert response.status == HTTPStatus.NOT_FOUND
-
-
-async def test_validator_2(make_get_request):
-    """Тест корректной валидации форм"""
-    response = await make_get_request("/persons/wrong-uuid")
-    assert response.status == HTTPStatus.NOT_FOUND
-
-
-async def test_validator_3(make_get_request):
-    """Тест корректной валидации форм"""
-    response = await make_get_request("/persons/persons/", {"page[number]": 0})
-    assert response.status == HTTPStatus.UNPROCESSABLE_ENTITY
-
-
-async def test_validator_4(make_get_request):
-    """Тест корректной валидации форм"""
-    response = await make_get_request("/persons/persons/", {"page[size]": 0})
-    assert response.status == HTTPStatus.UNPROCESSABLE_ENTITY
-
-
 async def test_redis(make_get_request):
     """Тест кэширования"""
     # этот запрос сделан без удаления кэша
